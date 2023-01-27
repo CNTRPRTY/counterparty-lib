@@ -1,5 +1,8 @@
 #! /usr/bin/python3
 
+class ComposeDisabledError(Exception):
+    pass
+
 class DatabaseError(Exception):
     pass
 
