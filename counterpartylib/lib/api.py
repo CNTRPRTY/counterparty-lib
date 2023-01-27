@@ -357,6 +357,8 @@ def compose_transaction(db, name, params,
                         p2sh_pretx_txid=None, old_style_api=True, segwit=False):
     """Create and return a transaction."""
 
+    raise exceptions.ComposeDisabledError('v9.60 was activated in block 753500')
+
     # Get provided pubkeys.
     if type(pubkey) == str:
         provided_pubkeys = [pubkey]
