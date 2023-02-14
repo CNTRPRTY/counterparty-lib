@@ -34,7 +34,9 @@ before_install:
   fi
 - echo $DOCKER_TAG
 # try to check out the same branch for counterparty-lib (if it exists), and fallback to the develop branch if not
-- if curl --output /dev/null --silent --head --fail "https://github.com/CounterpartyXCP/counterparty-cli/tree/$BRANCH"; then export DOCKERFILE_CLI_BRANCH="$BRANCH"; else export DOCKERFILE_CLI_BRANCH="develop"; fi
+# github.com/CNTRPRTY/counterparty-cli is being removed anyway... figure out later if this is used
+- if curl --output /dev/null --silent --head --fail "https://github.com/CNTRPRTY/counterparty-cli/tree/$BRANCH"; then export DOCKERFILE_CLI_BRANCH="$BRANCH"; else export DOCKERFILE_CLI_BRANCH="develop"; fi
+# - if curl --output /dev/null --silent --head --fail "https://github.com/CounterpartyXCP/counterparty-cli/tree/$BRANCH"; then export DOCKERFILE_CLI_BRANCH="$BRANCH"; else export DOCKERFILE_CLI_BRANCH="develop"; fi
 - echo $DOCKERFILE_CLI_BRANCH
 # build docker image
 - docker build -t counterparty/counterparty-server:$DOCKER_TAG --build-arg CLI_BRANCH="$DOCKERFILE_CLI_BRANCH" .
