@@ -11,7 +11,8 @@ log.set_logger(logger)
 
 from counterpartylib import server
 from counterpartylib.lib import config
-from counterpartycli.util import add_config_arguments, bootstrap
+from counterpartycli.util import add_config_arguments
+# from counterpartycli.util import add_config_arguments, bootstrap
 from counterpartycli.setup import generate_config_files
 from counterpartycli import APP_VERSION
 
@@ -89,6 +90,7 @@ def main():
     parser_kickstart = subparsers.add_parser('kickstart', help='rapidly build database by reading from Bitcoin Core blockchain')
     parser_kickstart.add_argument('--bitcoind-dir', help='Bitcoin Core data directory')
 
+    # keeping this for now, but it should have no effect
     parser_bootstrap = subparsers.add_parser('bootstrap', help='bootstrap database with hosted snapshot')
     parser_bootstrap.add_argument('-q', '--quiet', dest='quiet', action='store_true', help='suppress progress bar')
     #parser_bootstrap.add_argument('--branch', help='use a different branch for bootstrap db pulling')
@@ -108,10 +110,10 @@ def main():
         parser.print_help()
         sys.exit()
 
-    # Bootstrapping
-    if args.action == 'bootstrap':
-        bootstrap(testnet=args.testnet, quiet=args.quiet)
-        sys.exit()
+    # # Bootstrapping
+    # if args.action == 'bootstrap':
+    #     bootstrap(testnet=args.testnet, quiet=args.quiet)
+    #     sys.exit()
 
     def init_with_catch(fn, init_args):
         try:
