@@ -8,16 +8,16 @@ if [ ! -d /counterparty-cli/counterparty_cli.egg-info ]; then
     cd /counterparty-cli; python3 setup.py develop; cd /
 fi
 
-# Bootstrap if the database does not exist (do this here to handle cases
-# where a volume is mounted over the share dir, like the fednode docker compose config does...)
-if [ ! -f /root/.local/share/counterparty/counterparty.db ]; then
-    echo "Downloading mainnet bootstrap DB..."
-    counterparty-server bootstrap --quiet
-fi
-if [ ! -f /root/.local/share/counterparty/counterparty.testnet.db ]; then
-    echo "Downloading testnet bootstrap DB..."
-    counterparty-server --testnet bootstrap --quiet
-fi
+# # Bootstrap if the database does not exist (do this here to handle cases
+# # where a volume is mounted over the share dir, like the fednode docker compose config does...)
+# if [ ! -f /root/.local/share/counterparty/counterparty.db ]; then
+#     echo "Downloading mainnet bootstrap DB..."
+#     counterparty-server bootstrap --quiet
+# fi
+# if [ ! -f /root/.local/share/counterparty/counterparty.testnet.db ]; then
+#     echo "Downloading testnet bootstrap DB..."
+#     counterparty-server --testnet bootstrap --quiet
+# fi
 
 # Kick off the server, defaulting to the "start" subcommand
 # Launch utilizing the SIGTERM/SIGINT propagation pattern from
