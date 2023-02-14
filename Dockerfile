@@ -21,7 +21,14 @@ ENV LC_ALL en_US.UTF-8
 ENV HOME /root
 
 # Install counterparty-lib
-COPY . /counterparty-lib
+# COPY . /counterparty-lib
+RUN mkdir /counterparty-lib
+COPY requirements.txt /counterparty-lib/requirements.txt
+COPY setup.py /counterparty-lib/setup.py
+COPY counterpartylib /counterparty-lib/counterpartylib
+
+COPY counterparty-cli /counterparty-cli
+
 WORKDIR /counterparty-lib
 RUN pip3 install -r requirements.txt
 RUN python3 setup.py develop
@@ -31,9 +38,11 @@ RUN python3 setup.py install_apsw
 # NOTE: By default, check out the counterparty-cli master branch. You can override the BRANCH build arg for a different
 # branch (as you should check out the same branch as what you have with counterparty-lib, or a compatible one)
 # NOTE2: In the future, counterparty-lib and counterparty-cli will go back to being one repo...
-ARG CLI_BRANCH=master
-ENV CLI_BRANCH ${CLI_BRANCH}
-RUN git clone -b ${CLI_BRANCH} https://github.com/CounterpartyXCP/counterparty-cli.git /counterparty-cli
+# ARG CLI_BRANCH=master
+# ENV CLI_BRANCH ${CLI_BRANCH}
+# RUN git clone -b ${CLI_BRANCH} https://github.com/CounterpartyXCP/counterparty-cli.git /counterparty-cli
+
+# the future is now
 WORKDIR /counterparty-cli
 RUN pip3 install -r requirements.txt
 RUN python3 setup.py develop
