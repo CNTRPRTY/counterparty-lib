@@ -115,57 +115,57 @@ def value_out(quantity, asset, divisible=None):
         divisible = is_divisible(asset)
     return value_output(quantity, asset, divisible)
 
-def bootstrap(testnet=False, overwrite=True, ask_confirmation=False, quiet=False):
-    data_dir = appdirs.user_data_dir(appauthor=config.XCP_NAME, appname=config.APP_NAME, roaming=True)
+# def bootstrap(testnet=False, overwrite=True, ask_confirmation=False, quiet=False):
+#     data_dir = appdirs.user_data_dir(appauthor=config.XCP_NAME, appname=config.APP_NAME, roaming=True)
 
-    # Set Constants.
-    if testnet:
-        if check.CONSENSUS_HASH_VERSION_TESTNET < 7:
-            BOOTSTRAP_URL = 'https://counterparty.io/bootstrap/counterparty-db-testnet.latest.tar.gz'
-        else:
-            BOOTSTRAP_URL = 'https://counterparty.io/bootstrap/counterparty-db-testnet-{}.latest.tar.gz'.format(check.CONSENSUS_HASH_VERSION_TESTNET)
-        TARBALL_PATH = os.path.join(tempfile.gettempdir(), 'counterpartyd-testnet-db.latest.tar.gz')
-        DATABASE_PATH = os.path.join(data_dir, '{}.testnet.db'.format(config.APP_NAME))
-    else:
-        if check.CONSENSUS_HASH_VERSION_MAINNET < 3:
-            BOOTSTRAP_URL = 'https://counterparty.io/bootstrap/counterparty-db.latest.tar.gz'
-        else:
-            BOOTSTRAP_URL = 'https://counterparty.io/bootstrap/counterparty-db-{}.latest.tar.gz'.format(check.CONSENSUS_HASH_VERSION_MAINNET)
-        TARBALL_PATH = os.path.join(tempfile.gettempdir(), 'counterpartyd-db.latest.tar.gz')
-        DATABASE_PATH = os.path.join(data_dir, '{}.db'.format(config.APP_NAME))
+#     # Set Constants.
+#     if testnet:
+#         if check.CONSENSUS_HASH_VERSION_TESTNET < 7:
+#             BOOTSTRAP_URL = 'https://counterparty.io/bootstrap/counterparty-db-testnet.latest.tar.gz'
+#         else:
+#             BOOTSTRAP_URL = 'https://counterparty.io/bootstrap/counterparty-db-testnet-{}.latest.tar.gz'.format(check.CONSENSUS_HASH_VERSION_TESTNET)
+#         TARBALL_PATH = os.path.join(tempfile.gettempdir(), 'counterpartyd-testnet-db.latest.tar.gz')
+#         DATABASE_PATH = os.path.join(data_dir, '{}.testnet.db'.format(config.APP_NAME))
+#     else:
+#         if check.CONSENSUS_HASH_VERSION_MAINNET < 3:
+#             BOOTSTRAP_URL = 'https://counterparty.io/bootstrap/counterparty-db.latest.tar.gz'
+#         else:
+#             BOOTSTRAP_URL = 'https://counterparty.io/bootstrap/counterparty-db-{}.latest.tar.gz'.format(check.CONSENSUS_HASH_VERSION_MAINNET)
+#         TARBALL_PATH = os.path.join(tempfile.gettempdir(), 'counterpartyd-db.latest.tar.gz')
+#         DATABASE_PATH = os.path.join(data_dir, '{}.db'.format(config.APP_NAME))
 
-    # Prepare Directory.
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir, mode=0o755)
-    if not overwrite and os.path.exists(DATABASE_PATH):
-        return
+#     # Prepare Directory.
+#     if not os.path.exists(data_dir):
+#         os.makedirs(data_dir, mode=0o755)
+#     if not overwrite and os.path.exists(DATABASE_PATH):
+#         return
 
-    # Define Progress Bar.
-    def reporthook(blocknum, blocksize, totalsize):
-        readsofar = blocknum * blocksize
-        if totalsize > 0:
-            percent = readsofar * 1e2 / totalsize
-            s = "\r%5.1f%% %*d / %d" % (
-                percent, len(str(totalsize)), readsofar, totalsize)
-            sys.stderr.write(s)
-            if readsofar >= totalsize: # near the end
-                sys.stderr.write("\n")
-        else: # total size is unknown
-            sys.stderr.write("read %d\n" % (readsofar,))
+#     # Define Progress Bar.
+#     def reporthook(blocknum, blocksize, totalsize):
+#         readsofar = blocknum * blocksize
+#         if totalsize > 0:
+#             percent = readsofar * 1e2 / totalsize
+#             s = "\r%5.1f%% %*d / %d" % (
+#                 percent, len(str(totalsize)), readsofar, totalsize)
+#             sys.stderr.write(s)
+#             if readsofar >= totalsize: # near the end
+#                 sys.stderr.write("\n")
+#         else: # total size is unknown
+#             sys.stderr.write("read %d\n" % (readsofar,))
 
-    print('Downloading database from {}...'.format(BOOTSTRAP_URL))
-    urllib.request.urlretrieve(BOOTSTRAP_URL, TARBALL_PATH, reporthook if not quiet else None)
+#     print('Downloading database from {}...'.format(BOOTSTRAP_URL))
+#     urllib.request.urlretrieve(BOOTSTRAP_URL, TARBALL_PATH, reporthook if not quiet else None)
 
-    print('Extracting to "%s"...' % data_dir)
-    with tarfile.open(TARBALL_PATH, 'r:gz') as tar_file:
-        tar_file.extractall(path=data_dir)
+#     print('Extracting to "%s"...' % data_dir)
+#     with tarfile.open(TARBALL_PATH, 'r:gz') as tar_file:
+#         tar_file.extractall(path=data_dir)
 
-    assert os.path.exists(DATABASE_PATH)
-    os.chmod(DATABASE_PATH, 0o660)
+#     assert os.path.exists(DATABASE_PATH)
+#     os.chmod(DATABASE_PATH, 0o660)
 
-    print('Cleaning up...')
-    os.remove(TARBALL_PATH)
-    os.remove(os.path.join(data_dir, 'checksums.txt'))
+#     print('Cleaning up...')
+#     os.remove(TARBALL_PATH)
+#     os.remove(os.path.join(data_dir, 'checksums.txt'))
 
 # Set default values of command line arguments with config file
 def add_config_arguments(arg_parser, config_args, default_config_file, config_file_arg_name='config_file'):
