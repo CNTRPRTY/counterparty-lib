@@ -187,30 +187,30 @@ def check_change(protocol_change, change_name):
         else:
             warnings.warn(explanation)
 
+# TODO fix or rethink approach
 def software_version():
     if config.FORCE:
         return
     logger.debug('Checking version.')
 
-    try:
-        # if used do equivalent cntrprty github page
-        host = 'https://cntrprty.github.io/counterparty-lib/counterpartylib/protocol_changes.json'
-        # host = 'https://counterpartyxcp.github.io/counterparty-lib/counterpartylib/protocol_changes.json'
-        response = requests.get(host, headers={'cache-control': 'no-cache'})
-        versions = json.loads(response.text)
-    except (requests.exceptions.ConnectionError, ConnectionRefusedError, ValueError) as e:
-        logger.warning('Unable to check version! ' + str(sys.exc_info()[1]))
-        return
+    logger.debug('Not checking version, hosted protocol_changes.json is old (last change: issuance_lock_fix).')
+    # try:
+    #     host = 'https://counterpartyxcp.github.io/counterparty-lib/counterpartylib/protocol_changes.json'
+    #     response = requests.get(host, headers={'cache-control': 'no-cache'})
+    #     versions = json.loads(response.text)
+    # except (requests.exceptions.ConnectionError, ConnectionRefusedError, ValueError) as e:
+    #     logger.warning('Unable to check version! ' + str(sys.exc_info()[1]))
+    #     return
 
-    for change_name in versions:
-        protocol_change = versions[change_name]
-        try:
-            check_change(protocol_change, change_name)
-        except VersionUpdateRequiredError as e:
-            logger.error("Version Update Required", exc_info=sys.exc_info())
-            sys.exit(config.EXITCODE_UPDATE_REQUIRED)
+    # for change_name in versions:
+    #     protocol_change = versions[change_name]
+    #     try:
+    #         check_change(protocol_change, change_name)
+    #     except VersionUpdateRequiredError as e:
+    #         logger.error("Version Update Required", exc_info=sys.exc_info())
+    #         sys.exit(config.EXITCODE_UPDATE_REQUIRED)
 
-    logger.debug('Version check passed.')
+    # logger.debug('Version check passed.')
 
 
 class DatabaseVersionError(Exception):
