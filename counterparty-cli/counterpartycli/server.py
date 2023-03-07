@@ -53,8 +53,7 @@ CONFIG_ARGS = [
     [('--api-log-file',), {'nargs': '?', 'const': None, 'default': False, 'help': 'log API requests to the specified file (specify option without filename to use the default location)'}],
 
     [('--utxo-locks-max-addresses',), {'type': int, 'default': config.DEFAULT_UTXO_LOCKS_MAX_ADDRESSES, 'help': 'max number of addresses for which to track UTXO locks'}],
-    [('--utxo-locks-max-age',), {'type': int, 'default': config.DEFAULT_UTXO_LOCKS_MAX_AGE, 'help': 'how long to keep a lock on a UTXO being tracked'}],
-    [('--checkdb',), {'action': 'store_true', 'default': False, 'help': 'check the database for integrity (default: false)'}]
+    [('--utxo-locks-max-age',), {'type': int, 'default': config.DEFAULT_UTXO_LOCKS_MAX_AGE, 'help': 'how long to keep a lock on a UTXO being tracked'}]
 ]
 
 class VersionError(Exception):
@@ -95,10 +94,6 @@ def main():
     parser_bootstrap.add_argument('-q', '--quiet', dest='quiet', action='store_true', help='suppress progress bar')
     #parser_bootstrap.add_argument('--branch', help='use a different branch for bootstrap db pulling')
 
-    parser_checkdb = subparsers.add_parser('checkdb', help='do an integrity check on the database')
-
-    
-
     args = parser.parse_args()
 
     log.set_up(log.ROOT_LOGGER, verbose=args.verbose, console_logfilter=os.environ.get('COUNTERPARTY_LOGGING', None))
@@ -125,7 +120,7 @@ def main():
                 raise e
 
     # Configuration
-    COMMANDS_WITH_DB = ['reparse', 'rollback', 'kickstart', 'start', 'vacuum', 'checkdb']
+    COMMANDS_WITH_DB = ['reparse', 'rollback', 'kickstart', 'start', 'vacuum']
     COMMANDS_WITH_CONFIG = ['debug_config']
     if args.action in COMMANDS_WITH_DB or args.action in COMMANDS_WITH_CONFIG:
         init_args = dict(database_file=args.database_file,
@@ -150,8 +145,7 @@ def main():
                                 force=args.force, verbose=args.verbose, console_logfilter=os.environ.get('COUNTERPARTY_LOGGING', None),
                                 p2sh_dust_return_pubkey=args.p2sh_dust_return_pubkey,
                                 utxo_locks_max_addresses=args.utxo_locks_max_addresses,
-                                utxo_locks_max_age=args.utxo_locks_max_age,
-                                checkdb=(args.action == 'checkdb') or (args.checkdb))
+                                utxo_locks_max_age=args.utxo_locks_max_age)
                                 #,broadcast_tx_mainnet=args.broadcast_tx_mainnet)
 
     if args.action in COMMANDS_WITH_DB:
@@ -179,9 +173,6 @@ def main():
     elif args.action == 'vacuum':
         server.vacuum(db)
 
-    elif args.action == 'checkdb':
-        print("Database integrity check done!")
-    
     else:
         parser.print_help()
 
