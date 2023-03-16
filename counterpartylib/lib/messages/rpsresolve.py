@@ -28,13 +28,13 @@ def initialise (db):
                       FOREIGN KEY (tx_index, tx_hash, block_index) REFERENCES transactions(tx_index, tx_hash, block_index))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON rpsresolves (block_index)
+                      rpsresolves_block_index_idx ON rpsresolves (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      source_idx ON rpsresolves (source)
+                      rpsresolves_source_idx ON rpsresolves (source)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      rps_match_id_idx ON rpsresolves (rps_match_id)
+                      rpsresolves_rps_match_id_idx ON rpsresolves (rps_match_id)
                    ''')
 
 def validate (db, source, move, random, rps_match_id):

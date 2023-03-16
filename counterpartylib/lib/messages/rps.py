@@ -56,13 +56,13 @@ def initialise (db):
                       PRIMARY KEY (tx_index, tx_hash))
                   ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      source_idx ON rps (source)
+                      rps_source_idx ON rps (source)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      matching_idx ON rps (wager, possible_moves)
+                      rps_matching_idx ON rps (wager, possible_moves)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      status_idx ON rps (status)
+                      rps_status_idx ON rps (status)
                    ''')
 
     # RPS Matches
@@ -89,16 +89,16 @@ def initialise (db):
                       FOREIGN KEY (tx1_index, tx1_hash, tx1_block_index) REFERENCES transactions(tx_index, tx_hash, block_index))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      rps_match_expire_idx ON rps_matches (status, match_expire_index)
+                      rps_matches_match_expire_idx ON rps_matches (status, match_expire_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      rps_tx0_address_idx ON rps_matches (tx0_address)
+                      rps_matches_tx0_address_idx ON rps_matches (tx0_address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      rps_tx1_address_idx ON rps_matches (tx1_address)
+                      rps_matches_tx1_address_idx ON rps_matches (tx1_address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      status_idx ON rps_matches (status)
+                      rps_matches_status_idx ON rps_matches (status)
                    ''')
 
     # RPS Expirations
@@ -111,10 +111,10 @@ def initialise (db):
                       FOREIGN KEY (rps_index, rps_hash) REFERENCES rps(tx_index, tx_hash))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON rps_expirations (block_index)
+                      rps_expirations_block_index_idx ON rps_expirations (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      source_idx ON rps_expirations (source)
+                      rps_expirations_source_idx ON rps_expirations (source)
                    ''')
 
     # RPS Match Expirations
@@ -127,13 +127,13 @@ def initialise (db):
                       FOREIGN KEY (block_index) REFERENCES blocks(block_index))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON rps_match_expirations (block_index)
+                      rps_match_expirations_block_index_idx ON rps_match_expirations (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx0_address_idx ON rps_match_expirations (tx0_address)
+                      rps_match_expirations_tx0_address_idx ON rps_match_expirations (tx0_address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx1_address_idx ON rps_match_expirations (tx1_address)
+                      rps_match_expirations_tx1_address_idx ON rps_match_expirations (tx1_address)
                    ''')
 
 
