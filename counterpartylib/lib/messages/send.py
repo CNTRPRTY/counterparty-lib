@@ -69,16 +69,16 @@ def initialise (db):
         cursor.execute('ALTER TABLE new_sends RENAME TO sends')
 
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON sends (block_index)
+                      sends_block_index_idx ON sends (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      source_idx ON sends (source)
+                      sends_source_idx ON sends (source)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      destination_idx ON sends (destination)
+                      sends_destination_idx ON sends (destination)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      asset_idx ON sends (asset)
+                      sends_asset_idx ON sends (asset)
                    ''')
 
     # Adds a memo to sends
@@ -88,7 +88,7 @@ def initialise (db):
         cursor.execute('''ALTER TABLE sends ADD COLUMN memo BLOB''')
 
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      memo_idx ON sends (memo)
+                      sends_memo_idx ON sends (memo)
                    ''')
 
 def unpack(db, message, block_index):
