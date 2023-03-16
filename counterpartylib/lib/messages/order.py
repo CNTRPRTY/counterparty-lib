@@ -104,9 +104,6 @@ def initialise(db):
                       backward_status_idx ON order_matches (backward_asset, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      id_idx ON order_matches (id)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
                       tx0_address_idx ON order_matches (tx0_address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS

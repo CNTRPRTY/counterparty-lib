@@ -110,9 +110,6 @@ def initialise (db):
                       valid_feed_idx ON bet_matches (feed_address, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      id_idx ON bet_matches (id)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
                       tx0_address_idx ON bet_matches (tx0_address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
