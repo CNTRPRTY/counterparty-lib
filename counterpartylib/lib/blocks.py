@@ -341,7 +341,7 @@ def initialise(db):
                       asset_id TEXT UNIQUE,
                       asset_name TEXT UNIQUE,
                       block_index INTEGER,
-                      asset_longname TEXT)
+                      asset_longname TEXT UNIQUE)
                    ''')
 
     # Add asset_longname for sub-assets
@@ -349,7 +349,6 @@ def initialise(db):
     columns = [column['name'] for column in cursor.execute('''PRAGMA table_info(assets)''')]
     if 'asset_longname' not in columns:
         cursor.execute('''ALTER TABLE assets ADD COLUMN asset_longname TEXT''')
-    cursor.execute('''CREATE UNIQUE INDEX IF NOT EXISTS asset_longname_idx ON assets(asset_longname)''')
 
     cursor.execute('''SELECT * FROM assets WHERE asset_name = ?''', ('BTC',))
     if not list(cursor):
