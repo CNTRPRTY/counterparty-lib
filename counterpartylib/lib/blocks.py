@@ -231,9 +231,6 @@ def initialise(db):
                       PRIMARY KEY (block_index, block_hash))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON blocks (block_index)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
                       index_hash_idx ON blocks (block_index, block_hash)
                    ''')
 
@@ -275,12 +272,6 @@ def initialise(db):
                     ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
                       block_index_idx ON transactions (block_index)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx_index_idx ON transactions (tx_index)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx_hash_idx ON transactions (tx_hash)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
                       index_index_idx ON transactions (block_index, tx_index)
@@ -352,12 +343,6 @@ def initialise(db):
                       block_index INTEGER,
                       asset_longname TEXT)
                    ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      name_idx ON assets (asset_name)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      id_idx ON assets (asset_id)
-                   ''')
 
     # Add asset_longname for sub-assets
     #   SQLite can’t do `ALTER TABLE IF COLUMN NOT EXISTS`.
@@ -377,9 +362,6 @@ def initialise(db):
                       address TEXT UNIQUE,
                       options INTEGER,
                       block_index INTEGER)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      addresses_idx ON addresses (address)
                    ''')
 
     # Consolidated
