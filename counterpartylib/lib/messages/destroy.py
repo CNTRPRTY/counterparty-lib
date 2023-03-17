@@ -34,7 +34,7 @@ def initialise(db):
                       FOREIGN KEY (tx_index, tx_hash, block_index) REFERENCES transactions(tx_index, tx_hash, block_index))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      destructions_status_idx ON destructions (status)
+                      destructions_valid_asset_idx ON destructions (asset, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
                       destructions_address_idx ON destructions (source)
