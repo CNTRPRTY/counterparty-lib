@@ -99,6 +99,9 @@ def initialise(db):
     cursor.execute('''CREATE INDEX IF NOT EXISTS
                       issuances_source_idx ON issuances (source)
                    ''')
+    cursor.execute('''CREATE INDEX IF NOT EXISTS
+                      issuances_issuer_idx ON issuances (issuer)
+                   ''')
 
     cursor.execute('''CREATE INDEX IF NOT EXISTS
                       issuances_asset_longname_idx ON issuances (asset_longname)
