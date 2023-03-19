@@ -62,9 +62,6 @@ def initialise(db):
                       broadcasts_block_index_idx ON broadcasts (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      broadcasts_status_source_idx ON broadcasts (status, source)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
                       broadcasts_status_source_index_idx ON broadcasts (status, source, tx_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS

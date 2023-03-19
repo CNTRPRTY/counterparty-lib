@@ -59,9 +59,6 @@ def initialise (db):
                       bets_block_index_idx ON bets (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      bets_index_hash_idx ON bets (tx_index, tx_hash)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
                       bets_expire_idx ON bets (status, expire_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS

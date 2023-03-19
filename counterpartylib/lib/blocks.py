@@ -230,9 +230,6 @@ def initialise(db):
                       difficulty INTEGER,
                       PRIMARY KEY (block_index, block_hash))
                    ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      blocks_index_hash_idx ON blocks (block_index, block_hash)
-                   ''')
 
     # SQLite can’t do `ALTER TABLE IF COLUMN NOT EXISTS`.
     columns = [column['name'] for column in cursor.execute('''PRAGMA table_info(blocks)''')]
@@ -275,9 +272,6 @@ def initialise(db):
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
                       transactions_index_index_idx ON transactions (block_index, tx_index)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      transactions_index_hash_index_idx ON transactions (tx_index, tx_hash, block_index)
                    ''')
 
     # Purge database of blocks, transactions from before BLOCK_FIRST.

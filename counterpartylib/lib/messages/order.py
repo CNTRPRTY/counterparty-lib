@@ -49,9 +49,6 @@ def initialise(db):
                       orders_block_index_idx ON orders (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      orders_index_hash_idx ON orders (tx_index, tx_hash)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
                       orders_expire_idx ON orders (expire_index, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
