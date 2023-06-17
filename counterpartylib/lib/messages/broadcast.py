@@ -59,16 +59,13 @@ def initialise(db):
                       FOREIGN KEY (tx_index, tx_hash, block_index) REFERENCES transactions(tx_index, tx_hash, block_index))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON broadcasts (block_index)
+                      broadcasts_block_index_idx ON broadcasts (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      status_source_idx ON broadcasts (status, source)
+                      broadcasts_status_source_index_idx ON broadcasts (status, source, tx_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      status_source_index_idx ON broadcasts (status, source, tx_index)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      timestamp_idx ON broadcasts (timestamp)
+                      broadcasts_timestamp_idx ON broadcasts (timestamp)
                    ''')
 
 def validate (db, source, timestamp, value, fee_fraction_int, text, block_index):

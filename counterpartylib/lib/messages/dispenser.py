@@ -78,6 +78,25 @@ def initialise(db):
     if 'oracle_address' not in columns:
         cursor.execute('ALTER TABLE dispensers ADD COLUMN oracle_address TEXT')
 
+    cursor.execute('''CREATE INDEX IF NOT EXISTS
+                      dispenses_tx_hash_idx ON dispenses (tx_hash)
+                   ''')
+    cursor.execute('''CREATE INDEX IF NOT EXISTS
+                      dispenses_block_index_idx ON dispenses (block_index)
+                   ''')
+    cursor.execute('''CREATE INDEX IF NOT EXISTS
+                      dispenses_source_idx ON dispenses (source)
+                   ''')
+    cursor.execute('''CREATE INDEX IF NOT EXISTS
+                      dispenses_destination_idx ON dispenses (destination)
+                   ''')
+    cursor.execute('''CREATE INDEX IF NOT EXISTS
+                      dispenses_asset_idx ON dispenses (asset)
+                   ''')
+    cursor.execute('''CREATE INDEX IF NOT EXISTS
+                      dispenses_dispenser_tx_hash_idx ON dispenses (dispenser_tx_hash)
+                   ''')
+
 def validate (db, source, asset, give_quantity, escrow_quantity, mainchainrate, status, open_address, block_index, oracle_address):
     problems = []
     order_match = None

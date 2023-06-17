@@ -46,28 +46,25 @@ def initialise(db):
                       PRIMARY KEY (tx_index, tx_hash))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON orders (block_index)
+                      orders_block_index_idx ON orders (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      index_hash_idx ON orders (tx_index, tx_hash)
+                      orders_expire_idx ON orders (expire_index, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      expire_idx ON orders (expire_index, status)
+                      orders_give_status_idx ON orders (give_asset, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      give_status_idx ON orders (give_asset, status)
+                      orders_source_give_status_idx ON orders (source, give_asset, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      source_give_status_idx ON orders (source, give_asset, status)
+                      orders_give_get_status_idx ON orders (get_asset, give_asset, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      give_get_status_idx ON orders (get_asset, give_asset, status)
+                      orders_source_idx ON orders (source)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      source_idx ON orders (source)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      give_asset_idx ON orders (give_asset)
+                      orders_give_asset_idx ON orders (give_asset)
                    ''')
 
     # Order Matches
@@ -95,22 +92,19 @@ def initialise(db):
                       FOREIGN KEY (tx1_index, tx1_hash, tx1_block_index) REFERENCES transactions(tx_index, tx_hash, block_index))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      match_expire_idx ON order_matches (status, match_expire_index)
+                      order_matches_match_expire_idx ON order_matches (status, match_expire_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      forward_status_idx ON order_matches (forward_asset, status)
+                      order_matches_forward_status_idx ON order_matches (forward_asset, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      backward_status_idx ON order_matches (backward_asset, status)
+                      order_matches_backward_status_idx ON order_matches (backward_asset, status)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      id_idx ON order_matches (id)
+                      order_matches_tx0_address_idx ON order_matches (tx0_address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx0_address_idx ON order_matches (tx0_address)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx1_address_idx ON order_matches (tx1_address)
+                      order_matches_tx1_address_idx ON order_matches (tx1_address)
                    ''')
 
     # Order Expirations
@@ -123,10 +117,10 @@ def initialise(db):
                       FOREIGN KEY (order_index, order_hash) REFERENCES orders(tx_index, tx_hash))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON order_expirations (block_index)
+                      order_expirations_block_index_idx ON order_expirations (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      source_idx ON order_expirations (source)
+                      order_expirations_source_idx ON order_expirations (source)
                    ''')
 
     # Order Match Expirations
@@ -139,13 +133,13 @@ def initialise(db):
                       FOREIGN KEY (block_index) REFERENCES blocks(block_index))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON order_match_expirations (block_index)
+                      order_match_expirations_block_index_idx ON order_match_expirations (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx0_address_idx ON order_match_expirations (tx0_address)
+                      order_match_expirations_tx0_address_idx ON order_match_expirations (tx0_address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx1_address_idx ON order_match_expirations (tx1_address)
+                      order_match_expirations_tx1_address_idx ON order_match_expirations (tx1_address)
                    ''')
 
 def exact_penalty (db, address, block_index, order_match_id):

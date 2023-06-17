@@ -230,12 +230,6 @@ def initialise(db):
                       difficulty INTEGER,
                       PRIMARY KEY (block_index, block_hash))
                    ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON blocks (block_index)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      index_hash_idx ON blocks (block_index, block_hash)
-                   ''')
 
     # SQLite can’t do `ALTER TABLE IF COLUMN NOT EXISTS`.
     columns = [column['name'] for column in cursor.execute('''PRAGMA table_info(blocks)''')]
@@ -274,19 +268,10 @@ def initialise(db):
                       PRIMARY KEY (tx_index, tx_hash, block_index))
                     ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON transactions (block_index)
+                      transactions_block_index_idx ON transactions (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx_index_idx ON transactions (tx_index)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      tx_hash_idx ON transactions (tx_hash)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      index_index_idx ON transactions (block_index, tx_index)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      index_hash_index_idx ON transactions (tx_index, tx_hash, block_index)
+                      transactions_index_index_idx ON transactions (block_index, tx_index)
                    ''')
 
     # Purge database of blocks, transactions from before BLOCK_FIRST.
@@ -305,10 +290,10 @@ def initialise(db):
                       FOREIGN KEY (block_index) REFERENCES blocks(block_index))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      address_idx ON debits (address)
+                      debits_address_idx ON debits (address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      asset_idx ON debits (asset)
+                      debits_asset_idx ON debits (asset)
                    ''')
 
     # (Valid) credits
@@ -322,10 +307,10 @@ def initialise(db):
                       FOREIGN KEY (block_index) REFERENCES blocks(block_index))
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      address_idx ON credits (address)
+                      credits_address_idx ON credits (address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      asset_idx ON credits (asset)
+                      credits_asset_idx ON credits (asset)
                    ''')
 
     # Balances
@@ -335,13 +320,13 @@ def initialise(db):
                       quantity INTEGER)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      address_asset_idx ON balances (address, asset)
+                      balances_address_asset_idx ON balances (address, asset)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      address_idx ON balances (address)
+                      balances_address_idx ON balances (address)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      asset_idx ON balances (asset)
+                      balances_asset_idx ON balances (asset)
                    ''')
 
     # Assets
@@ -350,13 +335,7 @@ def initialise(db):
                       asset_id TEXT UNIQUE,
                       asset_name TEXT UNIQUE,
                       block_index INTEGER,
-                      asset_longname TEXT)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      name_idx ON assets (asset_name)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      id_idx ON assets (asset_id)
+                      asset_longname TEXT UNIQUE)
                    ''')
 
     # Add asset_longname for sub-assets
@@ -364,7 +343,6 @@ def initialise(db):
     columns = [column['name'] for column in cursor.execute('''PRAGMA table_info(assets)''')]
     if 'asset_longname' not in columns:
         cursor.execute('''ALTER TABLE assets ADD COLUMN asset_longname TEXT''')
-    cursor.execute('''CREATE UNIQUE INDEX IF NOT EXISTS asset_longname_idx ON assets(asset_longname)''')
 
     cursor.execute('''SELECT * FROM assets WHERE asset_name = ?''', ('BTC',))
     if not list(cursor):
@@ -377,9 +355,6 @@ def initialise(db):
                       address TEXT UNIQUE,
                       options INTEGER,
                       block_index INTEGER)
-                   ''')
-    cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      addresses_idx ON addresses (address)
                    ''')
 
     # Consolidated
@@ -409,10 +384,10 @@ def initialise(db):
                   ''')
                       # TODO: FOREIGN KEY (block_index) REFERENCES blocks(block_index) DEFERRABLE INITIALLY DEFERRED)
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_idx ON messages (block_index)
+                      messages_block_index_idx ON messages (block_index)
                    ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS
-                      block_index_message_index_idx ON messages (block_index, message_index)
+                      messages_block_index_message_index_idx ON messages (block_index, message_index)
                    ''')
 
     # Create undolog tables
