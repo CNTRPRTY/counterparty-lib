@@ -174,6 +174,7 @@ def api_server(request, cp_server):
     server.configure_rpc(config.RPC_PASSWORD)
 
     # start RPC server and wait for server to be ready
+    # TODO MemMempool
     api_server = api.APIServer()
     api_server.daemon = True
     api_server.start()
