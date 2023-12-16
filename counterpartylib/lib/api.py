@@ -32,6 +32,8 @@ from jsonrpc.exceptions import JSONRPCDispatchException
 import inspect
 from xmltodict import unparse as serialize_to_xml
 
+import itertools
+
 from counterpartylib.lib import config
 from counterpartylib.lib import exceptions
 from counterpartylib.lib import util
@@ -83,6 +85,11 @@ JSON_RPC_ERROR_API_COMPOSE = -32001 #code to use for error composing transaction
 
 current_api_status_code = None #is updated by the APIStatusPoller
 current_api_status_response_json = None #is updated by the APIStatusPoller
+
+# is updated by MemMempool ('maxmempool' bitcoin conf directly affects this, keeping 300MB default works well)
+memmempool_txids_non_cntrprty = set()
+memmempool_txids_cntrprty = set()
+memmempool_cached_response = []
 
 class APIError(Exception):
     pass
@@ -512,6 +519,150 @@ class APIStatusPoller(threading.Thread):
                 current_api_status_response_json = None
             time.sleep(config.BACKEND_POLL_INTERVAL)
 
+class MemMempool(threading.Thread):
+    """In-memory mempool, maintains a ready-to-serve response. Alternative to in-DB mempool that locks it up for too long during high mempool transaction count."""
+    def __init__(self):
+        self.last_mempool_check = 0
+        threading.Thread.__init__(self)
+        self.stop_event = threading.Event()
+
+    def stop(self):
+        self.stop_event.set()
+
+    def run(self):
+        logger.info('Starting MemMempool.')
+        global memmempool_txids_non_cntrprty
+        global memmempool_txids_cntrprty
+        global memmempool_cached_response
+        db = database.get_connection(read_only=True, integrity_check=False)
+
+        while self.stop_event.is_set() != True:
+
+            if time.time() - self.last_mempool_check > 1 * 60: # 1 minute since last check.
+
+                status = get_running_info_shared(db)
+                if status["server_ready"]:
+
+                    # TODO logs only showing in the first iteration
+                    # logger.info('Mempool processing start...')
+
+                    batch_size = 500
+                    raw_mempool = set(backend.getrawmempool())
+
+                    # | = set union (+ does not work)
+                    cached_txids = memmempool_txids_non_cntrprty | memmempool_txids_cntrprty
+
+                    to_remove = set()
+                    for tx_hash in cached_txids:
+                        if tx_hash not in raw_mempool:
+                            to_remove.add(tx_hash)
+
+                    to_process = set()
+                    for tx_hash in raw_mempool:
+                        if tx_hash not in cached_txids:
+                            to_process.add(tx_hash)
+
+                    to_process_batch = set(itertools.islice(to_process, batch_size))
+                    to_add = {}
+                    for tx_hash in to_process_batch:
+                        tx_hex = None
+                        try:
+                            tx_hex = backend.getrawtransaction(tx_hash)
+                            # if tx_hex is None:
+                            #     raise Exception('TODO if necessary{}'.format(tx_hash))
+                        except Exception as e:
+                            # TODO logs only showing in the first iteration
+                            logger.warning('Failed to fetch raw TX, continue; %s', (e, ))
+                            continue
+
+                        if tx_hex is None:
+                            continue
+
+                        source, destination, btc_amount, fee, data, decoded_tx = blocks.get_tx_info(tx_hex)
+                        data_hex = None
+                        if data is not None:
+                            data_hex = util.hexlify(data)
+
+                        if data_hex is not None:
+                            to_add[tx_hash] = {
+                                "tx_hash": tx_hash,
+                                "source": source,
+                                "destination": destination,
+                                "btc_amount": btc_amount,
+                                "fee": fee,
+                                "data": data_hex,
+                                "decoded_tx": decoded_tx,
+                            }
+
+                    processed_txids_cntrprty = set(to_add.keys())
+                    processed_txids_non_cntrprty = to_process_batch - processed_txids_cntrprty
+
+                    new_cached_response = []
+
+                    for cached_item in memmempool_cached_response:
+                        if cached_item["tx_hash"] not in to_remove:
+                            new_cached_response.append(cached_item)
+
+                    for key in to_add:
+                        new_cached_response.append(to_add[key])
+
+                    memmempool_txids_non_cntrprty = (memmempool_txids_non_cntrprty - to_remove) | processed_txids_non_cntrprty
+                    memmempool_txids_cntrprty = (memmempool_txids_cntrprty - to_remove) | processed_txids_cntrprty        
+                    memmempool_cached_response = new_cached_response
+
+                    self.last_mempool_check = time.time()
+
+            time.sleep(config.BACKEND_POLL_INTERVAL)
+
+def get_running_info_shared(db):
+    latestBlockIndex = backend.getblockcount()
+
+    try:
+        check_database_state(db, latestBlockIndex)
+    except DatabaseError:
+        caught_up = False
+    else:
+        caught_up = True
+
+    try:
+        cursor = db.cursor()
+        blocks = list(cursor.execute('''SELECT * FROM blocks WHERE block_index = ?''', (util.CURRENT_BLOCK_INDEX, )))
+        assert len(blocks) == 1
+        last_block = blocks[0]
+        cursor.close()
+    except:
+        last_block = None
+
+    try:
+        last_message = util.last_message(db)
+    except:
+        last_message = None
+
+    try:
+        indexd_blocks_behind = backend.getindexblocksbehind()
+    except:
+        indexd_blocks_behind = latestBlockIndex if latestBlockIndex > 0 else 999999
+    indexd_caught_up = indexd_blocks_behind <= 1
+
+    server_ready = caught_up and indexd_caught_up
+
+    return {
+        'server_ready': server_ready,
+        'db_caught_up': caught_up,
+        'bitcoin_block_count': latestBlockIndex,
+        'last_block': last_block,
+        'indexd_caught_up': indexd_caught_up,
+        'indexd_blocks_behind': indexd_blocks_behind,
+        'last_message_index': last_message['message_index'] if last_message else -1,
+        'api_limit_rows': config.API_LIMIT_ROWS,
+        'running_testnet': config.TESTNET,
+        'running_regtest': config.REGTEST,
+        'running_testcoin': config.TESTCOIN,
+        'version_major': config.VERSION_MAJOR,
+        'version_minor': config.VERSION_MINOR,
+        'version_revision': config.VERSION_REVISION
+    }
+
 class APIServer(threading.Thread):
     """Handle JSON-RPC API calls."""
     def __init__(self, db=None):
@@ -538,6 +689,12 @@ class APIServer(threading.Thread):
 
         ######################
         #READ API
+
+        @dispatcher.add_method
+        def get_memmempool():
+            return {
+                'cached_response': memmempool_cached_response,
+            }
 
         # Generate dynamically get_{table} methods
         def generate_get_method(table):
@@ -754,53 +911,7 @@ class APIServer(threading.Thread):
 
         @dispatcher.add_method
         def get_running_info():
-            latestBlockIndex = backend.getblockcount()
-
-            try:
-                check_database_state(self.db, latestBlockIndex)
-            except DatabaseError:
-                caught_up = False
-            else:
-                caught_up = True
-
-            try:
-                cursor = self.db.cursor()
-                blocks = list(cursor.execute('''SELECT * FROM blocks WHERE block_index = ?''', (util.CURRENT_BLOCK_INDEX, )))
-                assert len(blocks) == 1
-                last_block = blocks[0]
-                cursor.close()
-            except:
-                last_block = None
-
-            try:
-                last_message = util.last_message(self.db)
-            except:
-                last_message = None
-
-            try:
-                indexd_blocks_behind = backend.getindexblocksbehind()
-            except:
-                indexd_blocks_behind = latestBlockIndex if latestBlockIndex > 0 else 999999
-            indexd_caught_up = indexd_blocks_behind <= 1
-
-            server_ready = caught_up and indexd_caught_up
-
-            return {
-                'server_ready': server_ready,
-                'db_caught_up': caught_up,
-                'bitcoin_block_count': latestBlockIndex,
-                'last_block': last_block,
-                'indexd_caught_up': indexd_caught_up,
-                'indexd_blocks_behind': indexd_blocks_behind,
-                'last_message_index': last_message['message_index'] if last_message else -1,
-                'api_limit_rows': config.API_LIMIT_ROWS,
-                'running_testnet': config.TESTNET,
-                'running_regtest': config.REGTEST,
-                'running_testcoin': config.TESTCOIN,
-                'version_major': config.VERSION_MAJOR,
-                'version_minor': config.VERSION_MINOR,
-                'version_revision': config.VERSION_REVISION
-            }
+            return get_running_info_shared(self.db)
 
         @dispatcher.add_method
         def get_element_counts():
