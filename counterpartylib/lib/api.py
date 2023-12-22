@@ -287,7 +287,7 @@ def get_rows(db, table, filters=None, filterop='AND', order_by=None, order_dir=N
     query_result = db_query(db, statement, tuple(bindings))
     
     if table == 'balances':
-        return adjust_get_balances_results(query_result, db)
+        return adjust_get_balances_results(query_result)
 
     if table == 'destructions':
         return adjust_get_destructions_results(query_result)
@@ -302,7 +302,7 @@ def get_rows(db, table, filters=None, filterop='AND', order_by=None, order_dir=N
 
     return query_result
 
-def adjust_get_balances_results(query_result, db):
+def adjust_get_balances_results(query_result):
     filtered_results = []
     assets = {}
     for balances_row in list(query_result):
