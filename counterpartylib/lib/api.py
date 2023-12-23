@@ -1052,7 +1052,37 @@ class APIServer(threading.Thread):
             
             return {}
 
-        
+        @dispatcher.add_method
+        def get_address_balances(address):
+            cursor = self.db.cursor()
+            
+            if address is None:
+                raise APIError("You must provide an address")
+            
+            cursor.execute('''
+                SELECT b.*, ad.asset_longname, ad.divisible AS genesis_divisible
+                FROM balances b
+                JOIN (
+                    SELECT DISTINCT a.*, i.divisible
+                    FROM assets a
+                    JOIN issuances i ON (
+                        a.asset_name = i.asset AND
+                        a.block_index = i.block_index AND
+                        i.status = 'valid'
+                    )
+                    WHERE a.asset_name IN (
+                        SELECT bi.asset
+                        FROM balances bi
+                        WHERE bi.address = :address
+                    )
+                ) ad ON b.asset = ad.asset_name
+                WHERE b.address = :address
+            ''', {"address":address})
+            
+            balances = cursor.fetchall()            
+            return balances
+
+
 
         def _set_cors_headers(response):
             if not config.RPC_NO_ALLOW_CORS:
