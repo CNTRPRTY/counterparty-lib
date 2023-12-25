@@ -1050,6 +1050,8 @@ class APIServer(threading.Thread):
 
         @dispatcher.add_method
         def get_address_balances(address):
+            # like get_balances, this does not include btc balance
+
             cursor = self.db.cursor()
             
             if address is None:
@@ -1059,7 +1061,7 @@ class APIServer(threading.Thread):
                 SELECT b.*, ad.asset_longname, ad.divisible AS genesis_divisible
                 FROM balances b
                 JOIN (
-                    SELECT DISTINCT a.*, i.divisible
+                    SELECT DISTINCT a.asset_name, a.asset_longname, i.divisible
                     FROM assets a
                     JOIN issuances i ON (
                         a.asset_name = i.asset AND
@@ -1075,8 +1077,20 @@ class APIServer(threading.Thread):
                 WHERE b.address = :address
             ''', {"address":address})
             
-            balances = cursor.fetchall()            
-            return balances
+            balances = cursor.fetchall()
+
+            # query above does not include xcp
+            cursor.execute('''
+                SELECT *, NULL AS asset_longname, 1 AS genesis_divisible
+                FROM balances
+                WHERE address = :address
+                AND asset = 'XCP'
+            ''', {"address":address})
+            
+            balance_xcp = cursor.fetchall()
+
+            cursor.close()
+            return balances + balance_xcp
 
 
 
