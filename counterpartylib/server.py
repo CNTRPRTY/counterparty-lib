@@ -485,10 +485,10 @@ def start_all(db):
     api_status_poller.daemon = True
     api_status_poller.start()
 
-    # In-memory mempool.
-    in_memory_mempool = api.MemMempool()
-    in_memory_mempool.daemon = True
-    in_memory_mempool.start()
+    # # In-memory mempool.
+    # in_memory_mempool = api.MemMempool()
+    # in_memory_mempool.daemon = True
+    # in_memory_mempool.start()
 
     # API Server.
     api_server = api.APIServer()
