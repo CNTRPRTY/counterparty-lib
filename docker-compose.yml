@@ -1,0 +1,58 @@
+
+services:
+
+  bitcoin:
+  # bitcoind:
+    build:
+      context: ./bitcoin
+    stop_grace_period: 1m
+    volumes:
+      - data:/root/.bitcoin
+    restart: unless-stopped
+    ports: 
+      - "8332:8332"
+      - "8333:8333"
+
+  electrs:
+    build:
+      context: ./electrs
+    volumes:
+      - data:/root/.bitcoin
+      - data:/data
+    restart: unless-stopped
+    links:
+      - bitcoin
+    ports:
+      - "50001:50001"
+
+  counterparty:
+    build:
+      context: ./src/counterparty-lib
+    volumes:
+      - ./config/counterparty:/root/.config/counterparty
+      - data:/root/.local/share/counterparty
+      # - ./config/counterparty:/root/.config/counterparty
+      # - counterparty-data:/root/.local/share/counterparty
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "50"
+    restart: "unless-stopped"
+    links:
+      - bitcoin
+      - electrs
+    ports:
+      - "4000:4000"
+    environment:
+      - PARAMS=--config-file=/root/.config/counterparty/server.conf
+      - BTC_NETWORK=mainnet
+      - NO_BOOTSTRAP=${NO_BOOTSTRAP}
+
+volumes: 
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${COUNTERPARTY_DOCKER_DATA:-${XDG_DATA_HOME:-~/.local/share}}/counterparty-docker-data
