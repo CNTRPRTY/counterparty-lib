@@ -192,7 +192,8 @@ def validate (db, source, asset, give_quantity, escrow_quantity, mainchainrate, 
                             problems.append('cannot open on another address if it has any balance history')
                         
                         if util.enabled("dispenser_origin_permission_extended", block_index):
-                            address_oldest_transaction = backend.get_oldest_tx(query_address)
+                            address_oldest_transaction = backend.get_oldest_tx(query_address, block_index)
+                            # address_oldest_transaction = backend.get_oldest_tx(query_address)
                             if ("block_index" in address_oldest_transaction) and (address_oldest_transaction["block_index"] > 0) and (block_index > address_oldest_transaction["block_index"]):
                                 problems.append('cannot open on another address if it has any confirmed bitcoin txs')
 

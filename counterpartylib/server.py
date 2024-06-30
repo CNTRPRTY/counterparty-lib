@@ -200,7 +200,8 @@ def initialise_config(database_file=None, log_file=None, api_log_file=None,
     # THINGS WE CONNECT TO
 
     # Backend name
-    config.BACKEND_NAME = 'addrindexrs'
+    config.BACKEND_NAME = 'electrs'
+    # config.BACKEND_NAME = 'addrindexrs'
 
     # Backend RPC host (Bitcoin Core)
     if backend_connect:

@@ -16,7 +16,8 @@ from counterpartylib.lib import script
 from counterpartylib.lib import config
 from counterpartylib.lib import exceptions
 
-from counterpartylib.lib.backend import addrindexrs
+from counterpartylib.lib.backend import electrs
+# from counterpartylib.lib.backend import addrindexrs
 
 MEMPOOL_CACHE_INITIALIZED = False
 
@@ -203,8 +204,10 @@ def get_unspent_txouts(source, unconfirmed=False, unspent_tx_hash=None):
 def search_raw_transactions(address, unconfirmed=True, only_tx_hashes=False):
     return BACKEND().search_raw_transactions(address, unconfirmed, only_tx_hashes)
 
-def get_oldest_tx(address):
-    return BACKEND().get_oldest_tx(address)
+def get_oldest_tx(address, block_index):
+    return BACKEND().get_oldest_tx(address, block_index)
+# def get_oldest_tx(address):
+#     return BACKEND().get_oldest_tx(address)
 
 class UnknownPubKeyError(Exception):
     pass
